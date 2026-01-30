@@ -31,6 +31,7 @@ BEGIN
         );
     END;
 
+    TRUNCATE TABLE dbo.stg_ProductionData;
     /*===========================================================
       2. Bulk Load Data into Staging
     ===========================================================*/
@@ -63,6 +64,8 @@ BEGIN
         );
     END;
 
+    TRUNCATE TABLE dbo.ProductionData;
+
     /*===========================================================
       4. Transform and Insert Cleaned Data
     ===========================================================*/
@@ -75,7 +78,7 @@ BEGIN
             produced_material_release_type,
             SUM(produced_material_quantity) AS produced_material_quantity,
             component_material,
-            ISNULL(component_material_production_type, '_') AS component_material_production_type,
+            ISNULL(component_material_production_type, '0') AS component_material_production_type,-- If not normalized, null values in GROUP BY can cause duplicated rows and produce more data than expected.
             component_material_release_type,
             SUM(component_material_quantity) AS component_material_quantity
         FROM dbo.stg_ProductionData
@@ -114,7 +117,7 @@ GO
 /*===========================================================
     END Store Procedure 
 ===========================================================*/
-
+EXEC dbo.usp_LoadProductionData;
 
 
 SELECT * FROM dbo.ProductionData
