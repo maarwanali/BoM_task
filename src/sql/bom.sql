@@ -1,4 +1,9 @@
-CREATE DATABASE BomDB;
+
+IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'BomDB')
+BEGIN
+    CREATE DATABASE BomDB;
+END;
+GO
 
 USE BomDB;
 GO
@@ -78,7 +83,7 @@ BEGIN
             produced_material_release_type,
             SUM(produced_material_quantity) AS produced_material_quantity,
             component_material,
-            ISNULL(component_material_production_type, '0') AS component_material_production_type,-- If not normalized, null values in GROUP BY can cause duplicated rows and produce more data than expected.
+            component_material_production_type AS component_material_production_type,
             component_material_release_type,
             SUM(component_material_quantity) AS component_material_quantity
         FROM dbo.stg_ProductionData
@@ -113,14 +118,14 @@ BEGIN
     FROM cleaned_data;
 
 END;
-GO
+Go
 /*===========================================================
     END Store Procedure 
 ===========================================================*/
 EXEC dbo.usp_LoadProductionData;
 
 
-SELECT * FROM dbo.ProductionData
+SELECT * FROM dbo.ProductionData;
 GO
 
 /*===========================================================
@@ -131,7 +136,7 @@ AS
 WITH recursive_cte AS (
     -- Anchor query
     SELECT 
-        plant_id,
+        plant_id AS plant,
         year,
         produced_material AS fin_material_id,
         produced_material_production_type AS fin_material_production_type,
@@ -154,7 +159,7 @@ WITH recursive_cte AS (
 
     -- Recursive query
     SELECT 
-        pr.plant_id,
+        pr.plant_id AS plant,
         pr.year,
         rc.fin_material_id,
         rc.fin_material_production_type,
