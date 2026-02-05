@@ -1,0 +1,18 @@
+
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: ${SQLSERVER_CONTAINER}
+    ports:
+      - "${SQLSERVER_PORT}:1433"
+    environment:
+      ACCEPT_EULA: ${ACCEPT_EULA}
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+      - ./import:/var/opt/mssql/import
+    restart: unless-stopped
+
+volumes:
+  sqlserverdata:
